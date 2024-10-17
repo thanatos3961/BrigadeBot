@@ -1,0 +1,70 @@
+# IGNORE
+@bot.check
+async def globally_block_commands(ctx: commands.Context):
+    if bot_locked and ctx.author.id != bot.owner_id:
+        await ctx.send(embed=discord.Embed(
+            title="Locked",
+            description="The bot is currently locked and only the owner can use commands.",
+            color=discord.Color.red()
+        ))
+        return False
+    return True
+
+@bot.command(name='lock', description='Locks the bot for everyone except the owner.')
+@commands.is_owner()
+async def lock(ctx: commands.Context):
+    global bot_locked
+    bot_locked = True
+    await ctx.send(embed=discord.Embed(
+        title="Bot Locked",
+        description="The bot is now locked. Only the owner can use commands.",
+        color=discord.Color.red()
+    ))
+
+@bot.command(name='unlock', description='Unlocks the bot for everyone.')
+@commands.is_owner()
+async def unlock(ctx: commands.Context):
+    global bot_locked
+    bot_locked = False
+    await ctx.send(embed=discord.Embed(
+        title="Bot Unlocked",
+        description="The bot is now unlocked. All users can use commands.", 
+        color=discord.Color.green()
+    ))
+
+@bot.command(name='reload', description='Reloads a cog/extension.')
+@commands.is_owner()
+async def reload(ctx: commands.Context, extension: str):
+    try:
+        await bot.unload_extension(f'cogs.{extension}')
+        await bot.load_extension(f'cogs.{extension}')
+        await ctx.send(embed=discord.Embed(
+            title="Reloaded",
+            description=f"Reloaded extension `{extension}` successfully.",
+            color=discord.Color.green()
+        ))
+    except Exception as e:
+        await ctx.send(embed=discord.Embed(
+            title="Error",
+            description=f"Failed to reload extension `{extension}`: {str(e)}",
+            color=discord.Color.red()
+        ))
+
+@bot.command(name='unload', description='Unloads a cog by name.')
+@commands.is_owner()  # Ensure only the bot owner can use this command
+async def unload(ctx: commands.Context, cog_name: str):
+    try:
+        await bot.unload_extension(f'cogs.{cog_name}')
+        await ctx.send(embed=discord.Embed(
+            title="Cog Unloaded",
+            description=f"The cog `{cog_name}` has been unloaded successfully.",
+            color=discord.Color.green()
+        ))
+        print(f"Unloaded extension: {cog_name}")
+    except Exception as e:
+        await ctx.send(embed=discord.Embed(
+            title="Error",
+            description=f"Failed to unload cog `{cog_name}`: {e}",
+            color=discord.Color.red()
+        ))
+        print(f"Failed to unload extension {cog_name}: {e}")
